@@ -3,13 +3,8 @@
 #include <ntstrsafe.h>
 
 static WCHAR      g_wszLogPath[1024] = { 0 };
-<<<<<<< HEAD
 static BOOLEAN    g_bInitialized = FALSE;   // DebugLogInit 성공 시 TRUE
 static ERESOURCE  g_DebugWriteLock;
-=======
-static BOOLEAN    g_bInitialized = FALSE;   // DebugLogInit 성공 시 TRUE
-static KSPIN_LOCK g_DebugWrite;
->>>>>>> 539cc24a4f6e84e27b6a3993de896ce6521b1823
 
 #else
 #include <Windows.h>
@@ -273,18 +268,13 @@ static void WriteToFile(const WCHAR* pwszMsg)
     {
         return;
     }
-    
+
 
     KeEnterCriticalRegion();
     ExAcquireResourceExclusiveLite(&g_DebugWriteLock, TRUE);
     ZwWriteFile(hLogFile, NULL, NULL, NULL, &ioStatus, szUtf8Buf, nUtf8Len, NULL, NULL);
     ExReleaseResourceLite(&g_DebugWriteLock);
     KeLeaveCriticalRegion();
-
-    KIRQL Irql;
-    KeAcquireSpinLock(&g_DebugWrite, &Irql);
-    ZwWriteFile(hLogFile, NULL, NULL, NULL, &ioStatus, szUtf8Buf, nUtf8Len, NULL, NULL);
-    KeReleaseSpinLock(&g_DebugWrite, Irql);
 
     ZwClose(hLogFile);
 }
@@ -305,7 +295,7 @@ void DebugLogWrite(DBG_LEVEL level, const wchar_t* fmt, ...)
     // [LEVEL][Module][Time] msg
     GetTimeStr(wszTimeBuf, 200);
     RtlStringCchPrintfW(wszFullBuf, 1024, L"[%s][%s][%s] %s\n",
-    GetLevelStr(level), DBG_MODULE_NAME, wszTimeBuf, wszMsgBuf);
+        GetLevelStr(level), DBG_MODULE_NAME, wszTimeBuf, wszMsgBuf);
 
 
     DbgPrint("%ws", wszFullBuf);
