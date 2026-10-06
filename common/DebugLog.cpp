@@ -4,7 +4,7 @@
 
 static WCHAR      g_wszLogPath[1024] = { 0 };
 <<<<<<< HEAD
-static BOOLEAN    g_bInitialized = FALSE;   // DebugLogInit ¼º°ø ½Ã TRUE
+static BOOLEAN    g_bInitialized = FALSE;   // DebugLogInit ì„±ê³µ ì‹œ TRUE
 static ERESOURCE  g_DebugWriteLock;
 =======
 static BOOLEAN    g_bInitialized = FALSE;   // DebugLogInit ì„±ê³µ ì‹œ TRUE
@@ -257,11 +257,6 @@ static void WriteToFile(const WCHAR* pwszMsg)
     RtlInitUnicodeString(&filePath, g_wszLogPath);
     InitializeObjectAttributes(&objAttr, &filePath, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE, NULL, NULL);
 
-<<<<<<< HEAD
-    // ÀÌ¾î¾²±â ¸ðµå·Î ¿­±â
-=======
-    // ì´ì–´ì“°ê¸° ëª¨ë“œë¡œ ì—´ê¸°
->>>>>>> 539cc24a4f6e84e27b6a3993de896ce6521b1823
     NTSTATUS status = ZwCreateFile(&hLogFile,
         FILE_APPEND_DATA | SYNCHRONIZE,
         &objAttr,
@@ -279,18 +274,18 @@ static void WriteToFile(const WCHAR* pwszMsg)
         return;
     }
     
-<<<<<<< HEAD
+
     KeEnterCriticalRegion();
     ExAcquireResourceExclusiveLite(&g_DebugWriteLock, TRUE);
     ZwWriteFile(hLogFile, NULL, NULL, NULL, &ioStatus, szUtf8Buf, nUtf8Len, NULL, NULL);
     ExReleaseResourceLite(&g_DebugWriteLock);
     KeLeaveCriticalRegion();
-=======
+
     KIRQL Irql;
     KeAcquireSpinLock(&g_DebugWrite, &Irql);
     ZwWriteFile(hLogFile, NULL, NULL, NULL, &ioStatus, szUtf8Buf, nUtf8Len, NULL, NULL);
     KeReleaseSpinLock(&g_DebugWrite, Irql);
->>>>>>> 539cc24a4f6e84e27b6a3993de896ce6521b1823
+
     ZwClose(hLogFile);
 }
 
@@ -310,11 +305,8 @@ void DebugLogWrite(DBG_LEVEL level, const wchar_t* fmt, ...)
     // [LEVEL][Module][Time] msg
     GetTimeStr(wszTimeBuf, 200);
     RtlStringCchPrintfW(wszFullBuf, 1024, L"[%s][%s][%s] %s\n",
-<<<<<<< HEAD
     GetLevelStr(level), DBG_MODULE_NAME, wszTimeBuf, wszMsgBuf);
-=======
-       GetLevelStr(level), DBG_MODULE_NAME, wszTimeBuf, wszMsgBuf);
->>>>>>> 539cc24a4f6e84e27b6a3993de896ce6521b1823
+
 
     DbgPrint("%ws", wszFullBuf);
     WriteToFile(wszFullBuf);
