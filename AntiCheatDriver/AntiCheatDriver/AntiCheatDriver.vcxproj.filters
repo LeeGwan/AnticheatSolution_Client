@@ -48,14 +48,32 @@
     <ClCompile Include="..\..\common\DebugLog.cpp">
       <Filter>Header Files\common</Filter>
     </ClCompile>
-    <ClCompile Include="core\globals.c">
-      <Filter>Source Files\core</Filter>
-    </ClCompile>
     <ClCompile Include="core\imports.c">
       <Filter>Source Files\core</Filter>
     </ClCompile>
     <ClCompile Include="core\OSinfo.c">
       <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="guard\guard_handle.c">
+      <Filter>Source Files\guard</Filter>
+    </ClCompile>
+    <ClCompile Include="guard\guard_image.c">
+      <Filter>Source Files\guard</Filter>
+    </ClCompile>
+    <ClCompile Include="core\init.c">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="guard\guard_net.c">
+      <Filter>Source Files\guard</Filter>
+    </ClCompile>
+    <ClCompile Include="guard\guard_process.c">
+      <Filter>Source Files\guard</Filter>
+    </ClCompile>
+    <ClCompile Include="guard\guard_register.c">
+      <Filter>Source Files\guard</Filter>
+    </ClCompile>
+    <ClCompile Include="guard\guard_thread.c">
+      <Filter>Source Files\guard</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -71,5 +89,34 @@
     <ClInclude Include="include\OSinfo.h">
       <Filter>Source Files\include</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Resource Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\guard_handle.h">
+      <Filter>Source Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\guard_image.h">
+      <Filter>Source Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\init.h">
+      <Filter>Source Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\guard_net.h">
+      <Filter>Source Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\guard_process.h">
+      <Filter>Source Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\guard_register.h">
+      <Filter>Source Files\include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\guard_thread.h">
+      <Filter>Source Files\include</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AntiCheatDriver.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

@@ -42,7 +42,7 @@
     <Configuration>Debug</Configuration>
     <Platform Condition="'$(Platform)' == ''">Win32</Platform>
     <RootNamespace>AntiCheatDriver</RootNamespace>
-    <WindowsTargetPlatformVersion>$(LatestTargetPlatformVersion)</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.22000.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -130,6 +130,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
     <OutDir>$(SolutionDir)..\Build\$(Platform)\$(ConfigurationName)\</OutDir>
+    <Inf2CatUseLocalTime>true</Inf2CatUseLocalTime>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <DebuggerFlavor>DbgengKernelDebugger</DebuggerFlavor>
@@ -174,6 +175,16 @@
       <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup>
+    <ResourceCompile>
+      <AdditionalIncludeDirectories>$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\um;$(WindowsSdkDir)Include\$(WindowsTargetPlatformVersion)\shared;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <Culture>0x0012</Culture>
+    </ResourceCompile>
+    <Link>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/INTEGRITYCHECK %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalDependencies Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(DDK_LIB_PATH)fwpkclnt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <DriverSign>
       <FileDigestAlgorithm>sha256</FileDigestAlgorithm>
@@ -202,16 +213,33 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\common\DebugLog.cpp" />
-    <ClCompile Include="core\globals.c" />
     <ClCompile Include="core\imports.c" />
+    <ClCompile Include="core\init.c" />
     <ClCompile Include="core\main.c" />
     <ClCompile Include="core\OSinfo.c" />
+    <ClCompile Include="guard\guard_handle.c" />
+    <ClCompile Include="guard\guard_image.c" />
+    <ClCompile Include="guard\guard_net.c" />
+    <ClCompile Include="guard\guard_process.c" />
+    <ClCompile Include="guard\guard_register.c" />
+    <ClCompile Include="guard\guard_thread.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\common\DebugLog.h" />
+    <ClInclude Include="include\guard_handle.h" />
+    <ClInclude Include="include\guard_image.h" />
+    <ClInclude Include="include\guard_net.h" />
+    <ClInclude Include="include\guard_process.h" />
+    <ClInclude Include="include\guard_register.h" />
+    <ClInclude Include="include\guard_thread.h" />
     <ClInclude Include="include\imports.h" />
+    <ClInclude Include="include\init.h" />
     <ClInclude Include="include\OSinfo.h" />
     <ClInclude Include="include\pch.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AntiCheatDriver.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

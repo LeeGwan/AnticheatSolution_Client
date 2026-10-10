@@ -1,21 +1,21 @@
 #pragma once
 
 // ============================================================
-//  WDK 커널 빌드 시 _KERNEL_MODE 자동 정의 -> 자동 분기
+//  WDK kernel build defines _KERNEL_MODE automatically -> auto branch
 //
-//  로그 경로
-//    커널: {driver 위치}\log\{DBG_MODULE_NAME}.log
-//    유저: {exe 위치}\log\{DBG_MODULE_NAME}.log
+//  Log path
+//    Kernel: {driver dir}\log\{DBG_MODULE_NAME}.log
+//    User:   {exe dir}\log\{DBG_MODULE_NAME}.log
 //
-//  파일 인코딩: UTF-8
-//  디버그 출력: DbgPrint (커널) / OutputDebugStringW (유저)
+//  File encoding: UTF-8
+//  Debug output: DbgPrint (kernel) / OutputDebugStringW (user)
 //
-//  [커널] DriverEntry 에서 반드시 호출
+//  [Kernel] Must be called in DriverEntry
 //    DebugLogInit(RegistryPath);
 // ============================================================
 
 #ifndef DBG_MODULE_NAME
-#define DBG_MODULE_NAME L"AntiCheatDriver.sys"   // 해당 프로세스명 적어주세요
+#define DBG_MODULE_NAME L"AntiCheatDriver.sys"   // Set this to the process name
 #endif
 
 typedef enum _DBG_LEVEL {
@@ -41,11 +41,11 @@ void ReleaseDebugLog();
 void DebugLogWrite(DBG_LEVEL level, const wchar_t* fmt, ...);
 #endif
 
-// L"" 접두사 자동으로 붙음
-// 사용: DBG_LOG("Hello %s", L"World")
-// 출력
-//   커널: [LEVEL][Module][YYYY-MM-DD HH:MM:SS] message
-//   유저: [LEVEL][Module][YYYY-MM-DD HH:MM:SS] message
+// L"" prefix is added automatically
+// Usage: DBG_LOG("Hello %s", L"World")
+// Output
+//   Kernel: [LEVEL][Module][YYYY-MM-DD HH:MM:SS] message
+//   User:   [LEVEL][Module][YYYY-MM-DD HH:MM:SS] message
 #define DBG_LOG(fmt, ...)   DebugLogWrite(DBG_LEVEL_LOG,   L##fmt, ##__VA_ARGS__)
 #define DBG_INFO(fmt, ...)  DebugLogWrite(DBG_LEVEL_INFO,  L##fmt, ##__VA_ARGS__)
 #define DBG_WARN(fmt, ...)  DebugLogWrite(DBG_LEVEL_WARN,  L##fmt, ##__VA_ARGS__)

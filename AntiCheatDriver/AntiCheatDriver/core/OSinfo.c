@@ -1,5 +1,7 @@
 #include "pch.h"
 
+OS_VER                   g_OSVersion = OS_UNKNOWN;
+
 BOOLEAN GetOsVersion(VOID)
 {
 	ULONG Major;

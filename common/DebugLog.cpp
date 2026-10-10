@@ -3,13 +3,8 @@
 #include <ntstrsafe.h>
 
 static WCHAR      g_wszLogPath[1024] = { 0 };
-<<<<<<< HEAD
-static BOOLEAN    g_bInitialized = FALSE;   // DebugLogInit ���� �� TRUE
+static BOOLEAN    g_bInitialized = FALSE;   // TRUE after DebugLogInit succeeds
 static ERESOURCE  g_DebugWriteLock;
-=======
-static BOOLEAN    g_bInitialized = FALSE;   // DebugLogInit 성공 시 TRUE
-static KSPIN_LOCK g_DebugWrite;
->>>>>>> 539cc24a4f6e84e27b6a3993de896ce6521b1823
 
 #else
 #include <Windows.h>
@@ -25,7 +20,7 @@ static CRITICAL_SECTION g_csDebugWrite;
 #include "DebugLog.h"
 
 
-// 로그 레벨 -> 문자열
+// Log level -> string
 static const wchar_t* GetLevelStr(DBG_LEVEL level)
 {
     switch (level)
@@ -41,6 +36,10 @@ static const wchar_t* GetLevelStr(DBG_LEVEL level)
 void ReleaseDebugLog()
 {
 #ifdef _KERNEL_MODE
+    if (g_bInitialized)
+    {
+        ExDeleteResourceLite(&g_DebugWriteLock);
+    }
 #else
     if (g_bInitialized)
     {
@@ -71,10 +70,10 @@ static void GetTimeStr(WCHAR* wszBuf, size_t nBufSize)
 }
 
 
-// 로그 파일 경로에서 디렉터리만 생성
+// Create only the directory part of the log file path
 static void CreateLogDir(PWCHAR pwszLogFilePath)
 {
-    // 마지막 '\' 찾기
+    // Find the last '\'
     PWCHAR pwszLastSlash = NULL;
     for (PWCHAR p = pwszLogFilePath; *p; p++)
     {
@@ -89,7 +88,7 @@ static void CreateLogDir(PWCHAR pwszLogFilePath)
         return;
     }
 
-    // 디렉터리 경로만 복사
+    // Copy only the directory path
     WCHAR wszdirPath[512] = { 0 };
     ULONG ndirLen = (ULONG)(pwszLastSlash - pwszLogFilePath);
     RtlCopyMemory(wszdirPath, pwszLogFilePath, ndirLen * sizeof(WCHAR));
@@ -121,7 +120,7 @@ static void CreateLogDir(PWCHAR pwszLogFilePath)
 }
 
 
-// 레지스트리 ImagePath 기준으로 로그 경로 설정
+// Set log path based on registry ImagePath
 void DebugLogInit(PUNICODE_STRING RegistryPath)
 {
     HANDLE                         hKey = NULL;
@@ -131,7 +130,7 @@ void DebugLogInit(PUNICODE_STRING RegistryPath)
     PKEY_VALUE_PARTIAL_INFORMATION pkvInfo = NULL;
     const ULONG                    kPoolTag = 'LgbD';
 
-    // 서비스 키 열기
+    // Open service key
     InitializeObjectAttributes(&objAttr, RegistryPath, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE, NULL, NULL);
 
     status = ZwOpenKey(&hKey, KEY_READ, &objAttr);
@@ -143,7 +142,7 @@ void DebugLogInit(PUNICODE_STRING RegistryPath)
     UNICODE_STRING valueName;
     RtlInitUnicodeString(&valueName, L"ImagePath");
 
-    // 필요한 크기 조회
+    // Query required size
     status = ZwQueryValueKey(hKey, &valueName, KeyValuePartialInformation, NULL, 0, &resultLen);
     if (status != STATUS_BUFFER_TOO_SMALL && status != STATUS_BUFFER_OVERFLOW)
     {
@@ -157,7 +156,7 @@ void DebugLogInit(PUNICODE_STRING RegistryPath)
         return;
     }
 
-    // 널 문자 자리까지 할당
+    // Allocate including null terminator
     ULONG allocLen = resultLen + sizeof(WCHAR);
     pkvInfo = (PKEY_VALUE_PARTIAL_INFORMATION)ExAllocatePoolWithTag(NonPagedPool, allocLen, kPoolTag);
     if (!pkvInfo)
@@ -167,7 +166,7 @@ void DebugLogInit(PUNICODE_STRING RegistryPath)
     }
     RtlZeroMemory(pkvInfo, allocLen);
 
-    // 실제 값 조회
+    // Query actual value
     status = ZwQueryValueKey(hKey, &valueName, KeyValuePartialInformation, pkvInfo, resultLen, &resultLen);
     ZwClose(hKey);
 
@@ -189,7 +188,7 @@ void DebugLogInit(PUNICODE_STRING RegistryPath)
 
     wszimagePath[nMaxChars] = L'\0';
 
-    // 드라이버 경로의 마지막 '\' 찾기
+    // Find the last '\' in driver path
     PWCHAR wszlastSlash = NULL;
     for (ULONG i = 0; i < nMaxChars && wszimagePath[i] != L'\0'; i++)
     {
@@ -207,14 +206,14 @@ void DebugLogInit(PUNICODE_STRING RegistryPath)
 
     ULONG ndirLen = (ULONG)(wszlastSlash - wszimagePath);
 
-    // "C:\..." 형태면 "\??\" 붙이기
+    // "C:\..." form, prepend "\??\"
     RtlZeroMemory(g_wszLogPath, sizeof(g_wszLogPath));
     if (wszimagePath[0] != L'\\')
     {
         RtlStringCchCopyW(g_wszLogPath, 1024, L"\\??\\");
     }
 
-    // 드라이버 디렉터리 복사
+    // Copy driver directory
     size_t nPathLen = 0;
     RtlStringCchLengthW(g_wszLogPath, 1024, &nPathLen);
     RtlCopyMemory(g_wszLogPath + nPathLen, wszimagePath, ndirLen * sizeof(WCHAR));
@@ -226,15 +225,15 @@ void DebugLogInit(PUNICODE_STRING RegistryPath)
     RtlStringCchCatW(g_wszLogPath, 1024, wszLogPath);
 
     CreateLogDir(g_wszLogPath);
-    g_bInitialized = TRUE;
 
     ExFreePoolWithTag(pkvInfo, kPoolTag);
 
     ExInitializeResourceLite(&g_DebugWriteLock);
+    g_bInitialized = TRUE;
 }
 
 
-// WCHAR -> UTF-8 변환 후 파일에 추가
+// Convert WCHAR -> UTF-8 and append to file
 static void WriteToFile(const WCHAR* pwszMsg)
 {
     if (!g_bInitialized)
@@ -242,7 +241,7 @@ static void WriteToFile(const WCHAR* pwszMsg)
         return;
     }
 
-    // UTF-8 변환
+    // UTF-8 conversion
     CHAR   szUtf8Buf[1024 * 2] = { 0 };
     ULONG  nUtf8Len = 0;
     size_t msgCharLen = 0;
@@ -257,11 +256,6 @@ static void WriteToFile(const WCHAR* pwszMsg)
     RtlInitUnicodeString(&filePath, g_wszLogPath);
     InitializeObjectAttributes(&objAttr, &filePath, OBJ_CASE_INSENSITIVE | OBJ_KERNEL_HANDLE, NULL, NULL);
 
-<<<<<<< HEAD
-    // �̾�� ���� ����
-=======
-    // 이어쓰기 모드로 열기
->>>>>>> 539cc24a4f6e84e27b6a3993de896ce6521b1823
     NTSTATUS status = ZwCreateFile(&hLogFile,
         FILE_APPEND_DATA | SYNCHRONIZE,
         &objAttr,
@@ -278,19 +272,14 @@ static void WriteToFile(const WCHAR* pwszMsg)
     {
         return;
     }
-    
-<<<<<<< HEAD
+
+
     KeEnterCriticalRegion();
     ExAcquireResourceExclusiveLite(&g_DebugWriteLock, TRUE);
     ZwWriteFile(hLogFile, NULL, NULL, NULL, &ioStatus, szUtf8Buf, nUtf8Len, NULL, NULL);
     ExReleaseResourceLite(&g_DebugWriteLock);
     KeLeaveCriticalRegion();
-=======
-    KIRQL Irql;
-    KeAcquireSpinLock(&g_DebugWrite, &Irql);
-    ZwWriteFile(hLogFile, NULL, NULL, NULL, &ioStatus, szUtf8Buf, nUtf8Len, NULL, NULL);
-    KeReleaseSpinLock(&g_DebugWrite, Irql);
->>>>>>> 539cc24a4f6e84e27b6a3993de896ce6521b1823
+
     ZwClose(hLogFile);
 }
 
@@ -302,7 +291,7 @@ void DebugLogWrite(DBG_LEVEL level, const wchar_t* fmt, ...)
     WCHAR   wszFullBuf[1024];
     va_list args;
 
-    // 사용자 메시지
+    // User message
     va_start(args, fmt);
     RtlStringCchVPrintfW(wszMsgBuf, 1024, fmt, args);
     va_end(args);
@@ -310,11 +299,8 @@ void DebugLogWrite(DBG_LEVEL level, const wchar_t* fmt, ...)
     // [LEVEL][Module][Time] msg
     GetTimeStr(wszTimeBuf, 200);
     RtlStringCchPrintfW(wszFullBuf, 1024, L"[%s][%s][%s] %s\n",
-<<<<<<< HEAD
-    GetLevelStr(level), DBG_MODULE_NAME, wszTimeBuf, wszMsgBuf);
-=======
-       GetLevelStr(level), DBG_MODULE_NAME, wszTimeBuf, wszMsgBuf);
->>>>>>> 539cc24a4f6e84e27b6a3993de896ce6521b1823
+        GetLevelStr(level), DBG_MODULE_NAME, wszTimeBuf, wszMsgBuf);
+
 
     DbgPrint("%ws", wszFullBuf);
     WriteToFile(wszFullBuf);
@@ -326,7 +312,7 @@ void DebugLogWrite(DBG_LEVEL level, const wchar_t* fmt, ...)
 // ================================================================
 #else
 
-// {exe 위치}\log\{Module}.log 경로 설정 (최초 1회)
+// Set {exe dir}\log\{Module}.log path (once)
 static void InitLogPath()
 {
     if (g_bInitialized)
@@ -334,7 +320,7 @@ static void InitLogPath()
         return;
     }
 
-    // exe 전체 경로
+    // Full exe path
     std::wstring wstrExePath(MAX_PATH, L'\0');
 
     DWORD dwPathLength = GetModuleFileNameW(NULL, wstrExePath.data(), static_cast<DWORD>(wstrExePath.size()));
@@ -345,7 +331,7 @@ static void InitLogPath()
 
     wstrExePath.resize(dwPathLength);
 
-    // 파일명 제거 -> 디렉터리만 남김
+    // Strip file name -> keep directory only
     std::wstring::size_type nLastSlash = wstrExePath.rfind(L'\\');
     if (std::wstring::npos == nLastSlash)
     {
@@ -354,7 +340,7 @@ static void InitLogPath()
 
     wstrExePath.erase(nLastSlash);
 
-    // log 폴더 생성
+    // Create log folder
     std::wstring wstrLogDir = wstrExePath + L"\\log";
 
     if (!CreateDirectoryW(wstrLogDir.c_str(), NULL))
@@ -391,7 +377,7 @@ static std::wstring GetTimeStr()
 }
 
 
-// WCHAR -> UTF-8 변환 후 파일에 추가
+// Convert WCHAR -> UTF-8 and append to file
 static void WriteToFile(const std::wstring& wstrMsg)
 {
     InitLogPath();
@@ -401,7 +387,7 @@ static void WriteToFile(const std::wstring& wstrMsg)
         return;
     }
 
-    // UTF-8 변환 (길이에 널 문자 포함)
+    // UTF-8 conversion (length includes null terminator)
     int nUtf8Len = WideCharToMultiByte(CP_UTF8, 0, wstrMsg.c_str(), -1, NULL, NULL, NULL, NULL);
     if (nUtf8Len <= 0)
     {
@@ -411,7 +397,7 @@ static void WriteToFile(const std::wstring& wstrMsg)
     std::string strUtf8Buf(nUtf8Len, '\0');
     WideCharToMultiByte(CP_UTF8, 0, wstrMsg.c_str(), -1, strUtf8Buf.data(), nUtf8Len, NULL, NULL);
 
-    // 이어쓰기 모드로 열기
+    // Open in append mode
     HANDLE hFile = CreateFileW(g_wstrLogPath.c_str(),
         FILE_APPEND_DATA,
         FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -425,7 +411,7 @@ static void WriteToFile(const std::wstring& wstrMsg)
         return;
     }
 
-    // 널 문자 제외하고 기록
+    // Write excluding null terminator
     DWORD dwWritten = 0;
     EnterCriticalSection(&g_csDebugWrite);
     WriteFile(hFile, strUtf8Buf.c_str(), static_cast<DWORD>(nUtf8Len - 1), &dwWritten, NULL);
@@ -439,7 +425,7 @@ void DebugLogWrite(DBG_LEVEL level, const wchar_t* pwszFmt, ...)
 {
     wchar_t wszMsgBuf[1024 * 3] = { 0 };
 
-    // 사용자 메시지
+    // User message
     va_list args;
     va_start(args, pwszFmt);
     _vsnwprintf_s(wszMsgBuf, _countof(wszMsgBuf), _TRUNCATE, pwszFmt, args);
