@@ -1,0 +1,31 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AntiCheatService", "AntiCheatService\AntiCheatService.vcxproj", "{0ECF6C10-ABE0-4DBE-B92F-6461310B4FFB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AntiCheatServiceBridge", "AntiCheatServiceBridge\AntiCheatServiceBridge.vcxproj", "{8F0B551F-8433-442A-8963-50912A9EB016}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0ECF6C10-ABE0-4DBE-B92F-6461310B4FFB}.Debug|x64.ActiveCfg = Debug|x64
+		{0ECF6C10-ABE0-4DBE-B92F-6461310B4FFB}.Debug|x64.Build.0 = Debug|x64
+		{0ECF6C10-ABE0-4DBE-B92F-6461310B4FFB}.Release|x64.ActiveCfg = Release|x64
+		{0ECF6C10-ABE0-4DBE-B92F-6461310B4FFB}.Release|x64.Build.0 = Release|x64
+		{8F0B551F-8433-442A-8963-50912A9EB016}.Debug|x64.ActiveCfg = Debug|x64
+		{8F0B551F-8433-442A-8963-50912A9EB016}.Debug|x64.Build.0 = Debug|x64
+		{8F0B551F-8433-442A-8963-50912A9EB016}.Release|x64.ActiveCfg = Release|x64
+		{8F0B551F-8433-442A-8963-50912A9EB016}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {6AA9E20E-1ED5-4A40-BF0A-C39E580AAB49}
+	EndGlobalSection
+EndGlobal

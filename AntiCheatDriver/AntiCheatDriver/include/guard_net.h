@@ -1,4 +1,4 @@
 #pragma once
 
-NTSTATUS GuardNetInit(VOID);
+NTSTATUS GuardNetInit(_In_ PDRIVER_OBJECT DriverObject);
 VOID GuardNetUninit(VOID);

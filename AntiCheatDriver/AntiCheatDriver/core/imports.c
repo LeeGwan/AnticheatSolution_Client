@@ -15,7 +15,7 @@ FP_ObRegisterCallbacks              g_fpObRegisterCallbacks = NULL;
 FP_ObUnRegisterCallbacks            g_fpObUnRegisterCallbacks = NULL;
 FP_PsSetLoadImageNotifyRoutine      g_fpPsSetLoadImageNotifyRoutine = NULL;
 FP_PsRemoveLoadImageNotifyRoutine   g_fpPsRemoveLoadImageNotifyRoutine = NULL;
-FP_PsSetCreateProcessNotifyRoutine  g_fpPsSetCreateProcessNotifyRoutine = NULL;
+FP_PsSetCreateProcessNotifyRoutineEx  g_fpPsSetCreateProcessNotifyRoutineEx = NULL;
 FP_PsSetCreateThreadNotifyRoutine   g_fpPsSetCreateThreadNotifyRoutine = NULL;
 FP_PsRemoveCreateThreadNotifyRoutine g_fpPsRemoveCreateThreadNotifyRoutine = NULL;
 FP_CmRegisterCallbackEx             g_fpCmRegisterCallbackEx = NULL;
@@ -45,9 +45,9 @@ static const IMPORTSETFUNC g_Imports[] =
     { L"ObUnRegisterCallbacks",             (PVOID*)&g_fpObUnRegisterCallbacks          },
     { L"PsSetLoadImageNotifyRoutine",       (PVOID*)&g_fpPsSetLoadImageNotifyRoutine    },
     { L"PsRemoveLoadImageNotifyRoutine",    (PVOID*)&g_fpPsRemoveLoadImageNotifyRoutine },
-    { L"PsSetCreateProcessNotifyRoutine",   (PVOID*)&g_fpPsSetCreateProcessNotifyRoutine },
+    { L"PsSetCreateProcessNotifyRoutineEx", (PVOID*)&g_fpPsSetCreateProcessNotifyRoutineEx},
     { L"PsSetCreateThreadNotifyRoutine",    (PVOID*)&g_fpPsSetCreateThreadNotifyRoutine },
-    { L"PsRemoveCreateThreadNotifyRoutine", (PVOID*)&g_fpPsRemoveCreateThreadNotifyRoutine },
+    { L"PsRemoveCreateThreadNotifyRoutine", (PVOID*)&g_fpPsRemoveCreateThreadNotifyRoutine},
     { L"CmRegisterCallbackEx",              (PVOID*)&g_fpCmRegisterCallbackEx           },
     { L"CmUnRegisterCallback",              (PVOID*)&g_fpCmUnRegisterCallback           },
     { L"RtlInitUnicodeString",              (PVOID*)&g_fpRtlInitUnicodeString           },

@@ -12,8 +12,9 @@
 
 static BOOLEAN g_bNetRegistered = FALSE;
 
-NTSTATUS GuardNetInit(VOID)
+NTSTATUS GuardNetInit(_In_ PDRIVER_OBJECT DriverObject)
 {
+	UNREFERENCED_PARAMETER(DriverObject);
 	//FwpsCalloutRegister3 will study
 	return STATUS_SUCCESS;
 }

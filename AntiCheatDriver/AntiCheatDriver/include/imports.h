@@ -69,8 +69,8 @@ typedef NTSTATUS(NTAPI* FP_PsRemoveLoadImageNotifyRoutine)(
     _In_      PLOAD_IMAGE_NOTIFY_ROUTINE NotifyRoutine
     );
 
-typedef NTSTATUS(NTAPI* FP_PsSetCreateProcessNotifyRoutine)(
-    _In_      PCREATE_PROCESS_NOTIFY_ROUTINE NotifyRoutine,
+typedef NTSTATUS(NTAPI* FP_PsSetCreateProcessNotifyRoutineEx)(
+    _In_      PCREATE_PROCESS_NOTIFY_ROUTINE_EX NotifyRoutine,
     _In_      BOOLEAN                        Remove
     );
 

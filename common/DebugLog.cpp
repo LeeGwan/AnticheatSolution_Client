@@ -10,6 +10,7 @@ static ERESOURCE  g_DebugWriteLock;
 #include <Windows.h>
 #include <string>
 #include <stdarg.h>
+#include "UserUtil.h"
 
 static std::wstring     g_wstrLogPath;
 static BOOL             g_bInitialized = FALSE;
@@ -64,7 +65,7 @@ static void GetTimeStr(WCHAR* wszBuf, size_t nBufSize)
     ExSystemTimeToLocalTime(&sysTime, &localTime);
     RtlTimeToTimeFields(&localTime, &tf);
 
-    RtlStringCchPrintfW(wszBuf, nBufSize, L"%02d-%02d-%02d %02d:%02d:%02d",
+    RtlStringCchPrintfW(wszBuf, nBufSize, L"%02d-%02d-%02d %02d_%02d_%02d",
         (int)tf.Year, (int)tf.Month, (int)tf.Day,
         (int)tf.Hour, (int)tf.Minute, (int)tf.Second);
 }
@@ -312,76 +313,34 @@ void DebugLogWrite(DBG_LEVEL level, const wchar_t* fmt, ...)
 // ================================================================
 #else
 
-// Set {exe dir}\log\{Module}.log path (once)
-static void InitLogPath()
+void DebugLogInit()
 {
     if (g_bInitialized)
     {
         return;
     }
 
-    // Full exe path
-    std::wstring wstrExePath(MAX_PATH, L'\0');
-
-    DWORD dwPathLength = GetModuleFileNameW(NULL, wstrExePath.data(), static_cast<DWORD>(wstrExePath.size()));
-    if (dwPathLength == 0 || dwPathLength >= wstrExePath.size())
+    std::wstring wstrExeDir = CUserUtil::GetCurrentProcessDir();
+    if (wstrExeDir.empty())
     {
         return;
     }
 
-    wstrExePath.resize(dwPathLength);
-
-    // Strip file name -> keep directory only
-    std::wstring::size_type nLastSlash = wstrExePath.rfind(L'\\');
-    if (std::wstring::npos == nLastSlash)
+    std::wstring wstrLogDir = wstrExeDir + L"\\log";
+    if (!CUserUtil::CreateDir(wstrLogDir))
     {
         return;
-    }
-
-    wstrExePath.erase(nLastSlash);
-
-    // Create log folder
-    std::wstring wstrLogDir = wstrExePath + L"\\log";
-
-    if (!CreateDirectoryW(wstrLogDir.c_str(), NULL))
-    {
-        if (GetLastError() != ERROR_ALREADY_EXISTS)
-        {
-            return;
-        }
     }
 
     g_wstrLogPath = wstrLogDir + L"\\" + DBG_MODULE_NAME + L".log";
-
-    g_bInitialized = TRUE;
-
     InitializeCriticalSection(&g_csDebugWrite);
-}
-
-
-// "YYYY-MM-DD HH:MM:SS"
-static std::wstring GetTimeStr()
-{
-    SYSTEMTIME st;
-    GetLocalTime(&st);
-
-    std::wstring wstrTime(100, L'\0');
-    swprintf_s(wstrTime.data(), wstrTime.size(),
-        L"%02d-%02d-%02d %02d:%02d:%02d",
-        st.wYear, st.wMonth, st.wDay,
-        st.wHour, st.wMinute, st.wSecond);
-
-    wstrTime.resize(wcslen(wstrTime.c_str()));
-
-    return wstrTime;
+    g_bInitialized = TRUE;
 }
 
 
 // Convert WCHAR -> UTF-8 and append to file
 static void WriteToFile(const std::wstring& wstrMsg)
 {
-    InitLogPath();
-
     if (!g_bInitialized)
     {
         return;
@@ -432,7 +391,7 @@ void DebugLogWrite(DBG_LEVEL level, const wchar_t* pwszFmt, ...)
     va_end(args);
 
     // [Module][Time][LEVEL] msg
-    std::wstring wstrTime = GetTimeStr();
+    std::wstring wstrTime = CUserUtil::GetLocalTimeStr();
     std::wstring wstrFullMsg(
         L"[" + std::wstring(GetLevelStr(level)) +
         L"][" + DBG_MODULE_NAME +

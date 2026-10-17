@@ -75,7 +75,7 @@ NTSTATUS InitializeDriver(_In_ PDRIVER_OBJECT DriverObject)
 		goto Fail;
 	}
 
-	status = GuardNetInit();
+	status = GuardNetInit(DriverObject);
 	if (!NT_SUCCESS(status))
 	{
 		goto Fail;

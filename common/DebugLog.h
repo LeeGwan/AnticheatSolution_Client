@@ -37,15 +37,11 @@ extern "C" {
 }
 #endif
 #else
+void DebugLogInit();
 void ReleaseDebugLog();
 void DebugLogWrite(DBG_LEVEL level, const wchar_t* fmt, ...);
 #endif
 
-// L"" prefix is added automatically
-// Usage: DBG_LOG("Hello %s", L"World")
-// Output
-//   Kernel: [LEVEL][Module][YYYY-MM-DD HH:MM:SS] message
-//   User:   [LEVEL][Module][YYYY-MM-DD HH:MM:SS] message
 #define DBG_LOG(fmt, ...)   DebugLogWrite(DBG_LEVEL_LOG,   L##fmt, ##__VA_ARGS__)
 #define DBG_INFO(fmt, ...)  DebugLogWrite(DBG_LEVEL_INFO,  L##fmt, ##__VA_ARGS__)
 #define DBG_WARN(fmt, ...)  DebugLogWrite(DBG_LEVEL_WARN,  L##fmt, ##__VA_ARGS__)

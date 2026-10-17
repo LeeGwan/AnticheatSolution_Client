@@ -5,8 +5,7 @@ NTSTATUS DeviceCreate(PDEVICE_OBJECT DeviceObject, PIRP Irp);
 NTSTATUS DeviceClose(PDEVICE_OBJECT DeviceObject, PIRP Irp);
 NTSTATUS DeviceControl(PDEVICE_OBJECT DeviceObject, PIRP Irp);
 
-NTSTATUS
-DriverEntry(__in PDRIVER_OBJECT DriverObject, __in PUNICODE_STRING RegistryPath)
+NTSTATUS DriverEntry(__in PDRIVER_OBJECT DriverObject, __in PUNICODE_STRING RegistryPath)
 {
 	NTSTATUS status;
 

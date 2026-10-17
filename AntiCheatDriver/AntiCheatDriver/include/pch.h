@@ -3,6 +3,7 @@
 #include <ntifs.h>
 #include <ntstrsafe.h>
 #include <stdarg.h>
+
 #include "imports.h"
 #include "OSinfo.h"
 #include "guard_handle.h"
@@ -31,7 +32,7 @@ extern FP_ObRegisterCallbacks				g_fpObRegisterCallbacks;
 extern FP_ObUnRegisterCallbacks				g_fpObUnRegisterCallbacks;
 extern FP_PsSetLoadImageNotifyRoutine		g_fpPsSetLoadImageNotifyRoutine;
 extern FP_PsRemoveLoadImageNotifyRoutine	g_fpPsRemoveLoadImageNotifyRoutine;
-extern FP_PsSetCreateProcessNotifyRoutine	g_fpPsSetCreateProcessNotifyRoutine;
+extern FP_PsSetCreateProcessNotifyRoutineEx	g_fpPsSetCreateProcessNotifyRoutineEx;
 extern FP_PsSetCreateThreadNotifyRoutine	g_fpPsSetCreateThreadNotifyRoutine;
 extern FP_PsRemoveCreateThreadNotifyRoutine	g_fpPsRemoveCreateThreadNotifyRoutine;
 extern FP_CmRegisterCallbackEx				g_fpCmRegisterCallbackEx;
